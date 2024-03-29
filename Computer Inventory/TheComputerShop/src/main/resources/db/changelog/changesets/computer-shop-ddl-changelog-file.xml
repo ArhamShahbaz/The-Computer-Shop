@@ -1,0 +1,513 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
+
+    <property name="uuid_type" value="uuid" dbms="postgresql"/>
+    <property name="uuid_type" value="uniqueidentifier" dbms="mysql"/>
+    <property name="uuid_type" value="RAW(16)" dbms="oracle"/>
+
+    <property name="uuid_function" value="uid.uuid_generate_v4()" dbms="postgresql"/>
+    <property name="uuid_function" value="NEWID()" dbms="mysql"/>
+    <property name="uuid_function" value="sys_guid()" dbms="oracle"/>
+
+    <property name="now" value="now()" dbms="postgresql"/>
+    <property name="now" value="now()" dbms="mysql"/>
+    <property name="now" value="sysdate" dbms="oracle"/>
+
+    <property name="currentSchema" value="inventory"/>
+
+
+
+
+
+    <changeSet id="create-users-table" author="Arham Shahbaz">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists schemaName="${currentSchema}" tableName="USERS"/>
+            </not>
+        </preConditions>
+        <comment>Creating table USERS</comment>
+        <createTable schemaName="${currentSchema}" tableName="USERS">
+            <column name="USER_ID" type="${uuid_type}" valueComputed="${uuid_function}">
+                <constraints primaryKey="true" primaryKeyName="USER_ID_PK"/>
+            </column>
+            <column name="NAME" type="varchar(30)">
+                <constraints nullable="false" notNullConstraintName="USERS_NAME_NN"/>
+            </column>
+            <column name="USERNAME" type="varchar(50)" defaultValueDate="${now}">
+                <constraints nullable="false" notNullConstraintName="USERS_USERNAME_NN"/>
+            </column>
+            <column name="PASSWORD" type="varchar(250)" defaultValueDate="${now}">
+                <constraints nullable="false" notNullConstraintName="USERS_PASSWORD_NN"/>
+            </column>
+            <column name="ACTIVATION_STATUS" type="varchar(50)" defaultValueDate="${now}">
+                <constraints nullable="false" notNullConstraintName="USERS_ACTIVATION_STATUS_NN"/>
+            </column>
+            <column name="EMAIL" type="varchar(50)" defaultValueDate="${now}">
+                <constraints nullable="false" notNullConstraintName="USERS_EMAIL_NN"/>
+            </column>
+            <column name="PHONE_NO" type="varchar(50)" defaultValueDate="${now}">
+                <constraints nullable="false" notNullConstraintName="USERS_PHONE_NO_NN"/>
+            </column>
+            <column name="CREATED_BY" type="VARCHAR(30)"/>
+            <column name="CREATION_DATE" type="TIMESTAMP" defaultValueDate="${now}"/>
+            <column name="LAST_UPDATED_BY" type="VARCHAR(30)"/>
+            <column name="LAST_UPDATE_DATE" type="TIMESTAMP" defaultValueDate="${now}"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="create-table-roles" author="Arham Shahbaz">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists schemaName="${currentSchema}" tableName="ROLES"/>
+            </not>
+        </preConditions>
+        <comment>Creating table Roles</comment>
+        <createTable schemaName="${currentSchema}" tableName="ROLES">
+            <column name="ROLE_ID" type="${uuid_type}" valueComputed="${uuid_function}">
+                <constraints primaryKey="true" primaryKeyName="roles_pk"
+                             nullable="false" notNullConstraintName="ROLES_ROLE_ID_NN"/>
+            </column>
+            <column name="NAME" type="VARCHAR(30)">
+                <constraints nullable="false" notNullConstraintName="ROLES_NAME_NN"
+                             unique="true" uniqueConstraintName="roles_name_uk"/>
+            </column>
+            <column name="CREATED_BY" type="VARCHAR(30)"/>
+            <column name="CREATION_DATE" type="TIMESTAMP" defaultValueDate="${now}"/>
+            <column name="LAST_UPDATED_BY" type="VARCHAR(30)"/>
+            <column name="LAST_UPDATE_DATE" type="TIMESTAMP" defaultValueDate="${now}"/>
+        </createTable>
+    </changeSet>
+
+
+    <changeSet id="create-table-user_roles" author="Arham Shahbaz">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists schemaName="${currentSchema}" tableName="USER_ROLES"/>
+            </not>
+        </preConditions>
+        <comment>Creating table User_Roles</comment>
+        <createTable schemaName="${currentSchema}" tableName="USER_ROLES">
+            <column name="USER_ID" type="${uuid_type}">
+                <constraints nullable="false" notNullConstraintName="USER_ROLES_USER_ID_NN"/>
+            </column>
+            <column name="ROLE_ID" type="${uuid_type}">
+                <constraints nullable="false" notNullConstraintName="USER_ROLES_ROLE_ID_NN"/>
+            </column>
+        </createTable>
+        <addPrimaryKey columnNames="USER_ID, ROLE_ID" constraintName="USER_ROLES_PK"
+                       schemaName="${currentSchema}" tableName="user_roles"/>
+    </changeSet>
+
+
+    <changeSet id="add-foreign-key-user_roles_user_id_fk" author="Zahid Naeem">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists schemaName="${currentSchema}"
+                                            foreignKeyName="USER_ROLES_USER_ID_FK"/>
+            </not>
+        </preConditions>
+        <comment>Adding foreign key USER_ROLES_USER_ID_FK</comment>
+        <addForeignKeyConstraint
+                baseTableSchemaName="${currentSchema}"
+                baseTableName="USER_ROLES"
+                baseColumnNames="USER_ID"
+                constraintName="USER_ROLES_USER_ID_FK"
+                referencedTableSchemaName="${currentSchema}"
+                referencedTableName="USERS"
+                referencedColumnNames="USER_ID"/>
+    </changeSet>
+
+    <changeSet id="add-foreign-key-user_roles_role_id_fk" author="Zahid Naeem">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists schemaName="${currentSchema}"
+                                            foreignKeyName="USER_ROLES_ROLE_ID_FK"/>
+            </not>
+        </preConditions>
+        <comment>Adding foreign key USER_ROLES_ROLE_ID_FK</comment>
+        <addForeignKeyConstraint
+                baseTableSchemaName="${currentSchema}"
+                baseTableName="USER_ROLES"
+                baseColumnNames="ROLE_ID"
+                constraintName="USER_ROLES_ROLE_ID_FK"
+                referencedTableSchemaName="${currentSchema}"
+                referencedTableName="ROLES"
+                referencedColumnNames="ROLE_ID"/>
+    </changeSet>
+
+
+
+    <changeSet id="create-table-items" author="ARHAM SHAHBAZ">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists schemaName="${currentSchema}" tableName="ITEMS"/>
+            </not>
+        </preConditions>
+        <comment>Creating table ITEMS</comment>
+        <createTable schemaName="${currentSchema}" tableName="ITEMS">
+            <column name="ITEM_ID" type="${uuid_type}" valueComputed="${uuid_function}">
+                <constraints primaryKey="true" primaryKeyName="ITEMS_pk"/>
+            </column>
+            <column name="NAME" type="VARCHAR(50)">
+                <constraints nullable="false" notNullConstraintName="ITEM_NAME_NN"/>
+            </column>
+            <column name="MINIMUM_QUANTITY" type="float4"/>
+            <column name="STOCK_ITEM" type="boolean" defaultValueBoolean="true"/>
+            <column name="PURCHASE_RATE" type="float4" defaultValueNumeric="0">
+                <constraints nullable="false" notNullConstraintName="PURCHASE_RATE_NN"/>
+            </column>
+            <column name="SALE_RATE" type="float4" defaultValueNumeric="0">
+                <constraints nullable="false" notNullConstraintName="SALE_RATE_NN"/>
+            </column>
+            <column name="ROM" type="float4" defaultValueNumeric="0"/>
+            <column name="RAM" type="float4" defaultValueNumeric="0"/>
+            <column name="MODEL" type="VARCHAR(50)" defaultValueNumeric="0"/>
+            <column name="GENERATION" type="VARCHAR(50)" defaultValueNumeric="0"/>
+            <column name="REMARKS" type="VARCHAR(4000)"/>
+            <column name="CREATED_BY" type="VARCHAR(30)"/>
+            <column name="CREATION_DATE" type="TIMESTAMP" defaultValueDate="${now}"/>
+            <column name="LAST_UPDATED_BY" type="VARCHAR(30)"/>
+            <column name="LAST_UPDATE_DATE" type="TIMESTAMP" defaultValueDate="${now}"/>
+        </createTable>
+    </changeSet>
+
+
+
+    <changeSet id="create-table-item_adjustments" author="Arham Shahbaz">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists schemaName="${currentSchema}" tableName="ITEM_ADJUSTMENTS"/>
+            </not>
+        </preConditions>
+        <comment>Creating table ITEM_ADJUSTMENTS</comment>
+        <createTable schemaName="${currentSchema}" tableName="ITEM_ADJUSTMENTS">
+            <column name="ADJUSTMENT_ID" type="${uuid_type}" valueComputed="${uuid_function}">
+                <constraints primaryKey="true" primaryKeyName="ADJUSTMENT_ID_PK"/>
+            </column>
+            <column name="TYPE" type="varchar(30)">
+                <constraints nullable="false" notNullConstraintName="ADJUSTMENT_ITEM_TYPE_NN"/>
+            </column>
+            <column name="ADJUSTMENT_DATE" type="TIMESTAMP" defaultValueDate="${now}">
+                <constraints nullable="false" notNullConstraintName="ADJUSTMENT_ITEM_DATE_NN"/>
+            </column>
+            <column name="ADJUSTMENT_REASON" type="varchar(300)"/>
+            <column name="ITEM_ID" type="${uuid_type}">
+                <constraints nullable="false" notNullConstraintName="ITEM_ADJUSTMENTS_ITEM_ID_NN"/>
+            </column>
+            <column name="QUANTITY" type="float4"/>
+            <column name="CREATED_BY" type="VARCHAR(30)"/>
+            <column name="CREATION_DATE" type="TIMESTAMP" defaultValueDate="${now}"/>
+            <column name="LAST_UPDATED_BY" type="VARCHAR(30)"/>
+            <column name="LAST_UPDATE_DATE" type="TIMESTAMP" defaultValueDate="${now}"/>
+        </createTable>
+    </changeSet>
+
+
+    <changeSet id="create-table-item_trans_headers" author="Arham Shahbaz">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists schemaName="${currentSchema}" tableName="ITEM_TRANS_HEADERS"/>
+            </not>
+        </preConditions>
+        <comment>Creating table item_trans_headers</comment>
+        <createTable schemaName="${currentSchema}" tableName="ITEM_TRANS_HEADERS">
+            <column name="HEADER_ID" type="${uuid_type}" valueComputed="${uuid_function}">
+                <constraints primaryKey="true" primaryKeyName="ITEM_TRANS_HEADERS_PK"/>
+            </column>
+            <column name="TRANS_DATE" type="timestamp">
+                <constraints nullable="false" notNullConstraintName="TRANS_DATE_HEAD_TRANS_DATE_NN"/>
+            </column>
+            <column name="DISCOUNT" type="float4"/>
+            <column name="TOTAL" type="float4">
+                <constraints nullable="false" notNullConstraintName="TOTAL_TRANS_HEADERS_NN"/>
+            </column>
+            <column name="TRANS_TYPE" type="float4">
+                <constraints nullable="false" notNullConstraintName="TRANS_TYPE_TRANS_HEADERS_NN"/>
+            </column>
+            <column name="PAID" type="float4"/>
+            <column name="REMAINING" type="float4"/>
+            <column name="REMARKS" type="varchar(4000)"/>
+            <column name="CREATED_BY" type="VARCHAR(30)"/>
+            <column name="CREATION_DATE" type="TIMESTAMP" defaultValueDate="${now}"/>
+            <column name="LAST_UPDATED_BY" type="VARCHAR(30)"/>
+            <column name="LAST_UPDATE_DATE" type="TIMESTAMP" defaultValueDate="${now}"/>
+        </createTable>
+    </changeSet>
+
+
+    <changeSet id="create-table-item_trans_details" author="Arham Shahbaz">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists schemaName="${currentSchema}" tableName="ITEM_TRANS_DETAILS"/>
+            </not>
+        </preConditions>
+        <comment>Creating table item_trans_details</comment>
+        <createTable schemaName="${currentSchema}" tableName="ITEM_TRANS_DETAILS">
+            <column name="DETAIL_ID" type="${uuid_type}" valueComputed="${uuid_function}">
+                <constraints primaryKey="true" primaryKeyName="ITEM_TRANS_DETAILS_PK"/>
+            </column>
+            <column name="HEADER_ID" type="${uuid_type}">
+                <constraints nullable="false" notNullConstraintName="ITEM_TRANS_DETAIL_HEADER_ID_NN"/>
+            </column>
+            <column name="ITEM_ID" type="${uuid_type}">
+                <constraints nullable="false" notNullConstraintName="ITEM_TRANS_DETAIL_ITEM_ID_NN"/>
+            </column>
+            <column name="QUANTITY" type="float4"/>
+            <column name="DISCOUNT" type="float4"/>
+            <column name="CREATED_BY" type="VARCHAR(30)"/>
+            <column name="CREATION_DATE" type="TIMESTAMP" defaultValueDate="${now}"/>
+            <column name="LAST_UPDATED_BY" type="VARCHAR(30)"/>
+            <column name="LAST_UPDATE_DATE" type="TIMESTAMP" defaultValueDate="${now}"/>
+        </createTable>
+        <addUniqueConstraint schemaName="${currentSchema}" tableName="ITEM_TRANS_DETAILS"
+                             columnNames="HEADER_ID,ITEM_ID"
+                             constraintName="ITEM_TRANS_DETAILS_UKI"/>
+    </changeSet>
+
+
+
+
+    <changeSet id="generate-user_id-function" author="Arham Shahbaz" runOnChange="true">
+        <createProcedure>
+            CREATE OR REPLACE FUNCTION set_user_uuid_if_null()
+    RETURNS TRIGGER AS $$
+            BEGIN
+    IF NEW.user_id IS NULL THEN
+        NEW.user_id := public.uuid_generate_v4();
+            END IF;
+            RETURN NEW;
+            END;
+$$ LANGUAGE plpgsql;
+
+            CREATE TRIGGER set_uuid_trigger
+                BEFORE INSERT ON INVENTORY.USERS
+                FOR EACH ROW
+                EXECUTE FUNCTION set_user_uuid_if_null();
+
+        </createProcedure>
+
+        <rollback>
+            Drop FUNCTION set_user_uuid_if_null();
+        </rollback>
+    </changeSet>
+
+
+    <changeSet id="generate-item-id-function" author="Arham Shahbaz" runOnChange="true">
+        <createProcedure>
+            CREATE OR REPLACE FUNCTION set_item_uuid_if_null()
+    RETURNS TRIGGER AS $$
+            BEGIN
+    IF NEW.item_id IS NULL THEN
+        NEW.item_id := public.uuid_generate_v4();
+            END IF;
+            RETURN NEW;
+            END;
+$$ LANGUAGE plpgsql;
+
+            CREATE TRIGGER set_uuid_trigger
+                BEFORE INSERT ON INVENTORY.ITEMS
+                FOR EACH ROW
+                EXECUTE FUNCTION set_item_uuid_if_null();
+
+        </createProcedure>
+
+        <rollback>
+            Drop FUNCTION set_item_uuid_if_null();
+        </rollback>
+    </changeSet>
+
+
+
+    <changeSet id="create-function-item_adjustments_pk_func" author="Arham Shahbaz" runOnChange="true">
+        <createProcedure>
+            CREATE
+            OR REPLACE FUNCTION set_item_adjustments_pk_func() RETURNS trigger
+      LANGUAGE plpgsql
+      AS $$
+            BEGIN
+      IF
+            NEW.adjustment_id is null THEN
+      NEW.adjustment_id := public.uuid_generate_v4();
+            END IF;
+            RETURN NEW;
+            END;
+      $$;
+
+            CREATE TRIGGER set_uuid_trigger
+                BEFORE INSERT ON INVENTORY.ITEM_ADJUSTMENTS
+                FOR EACH ROW
+                EXECUTE FUNCTION set_item_adjustments_pk_func();
+        </createProcedure>
+        <rollback>
+            DROP FUNCTION set_item_adjustments_pk_func();
+        </rollback>
+    </changeSet>
+
+
+    <changeSet id="generate-trans_header-id-function" author="Arham Shahbaz" runOnChange="true">
+        <createProcedure>
+            CREATE OR REPLACE FUNCTION set_header_uuid_if_null()
+    RETURNS TRIGGER AS $$
+            BEGIN
+    IF NEW.header_id IS NULL THEN
+        NEW.header_id := public.uuid_generate_v4();
+            END IF;
+            RETURN NEW;
+            END;
+$$ LANGUAGE plpgsql;
+
+            CREATE TRIGGER set_uuid_trigger
+                BEFORE INSERT ON INVENTORY.item_trans_headers
+                FOR EACH ROW
+                EXECUTE FUNCTION set_header_uuid_if_null();
+
+        </createProcedure>
+
+        <rollback>
+            Drop FUNCTION set_header_uuid_if_null();
+        </rollback>
+    </changeSet>
+
+
+
+    <changeSet id="generate-trans_details-id-function" author="Arham Shahbaz" runOnChange="true">
+        <createProcedure>
+            CREATE OR REPLACE FUNCTION set_detail_uuid_if_null()
+    RETURNS TRIGGER AS $$
+            BEGIN
+    IF NEW.detail_id IS NULL THEN
+        NEW.detail_id := public.uuid_generate_v4();
+            END IF;
+            RETURN NEW;
+            END;
+$$ LANGUAGE plpgsql;
+
+            CREATE TRIGGER set_uuid_trigger
+                BEFORE INSERT ON INVENTORY.item_trans_details
+                FOR EACH ROW
+                EXECUTE FUNCTION set_detail_uuid_if_null();
+
+        </createProcedure>
+
+        <rollback>
+            Drop FUNCTION set_detail_uuid_if_null();
+        </rollback>
+    </changeSet>
+
+
+    
+    
+<!--  TABLES RELATIONS   -->
+
+    <changeSet id="add-foreign-key-item_adjustment_item_id_fk" author="Arham Shahbaz">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists schemaName="${currentSchema}"
+                                            foreignKeyName="ITEM_ADJUSTMENTS_ITEM_ID_FK"/>
+            </not>
+        </preConditions>
+        <comment>Adding foreign key item_adjustment_item_id_fk</comment>
+        <addForeignKeyConstraint
+                baseTableSchemaName="${currentSchema}"
+                baseTableName="ITEM_ADJUSTMENTS"
+                baseColumnNames="ITEM_ID"
+                constraintName="ITEM_ADJUSTMENTS_ITEM_ID_FK"
+                referencedTableSchemaName="${currentSchema}"
+                referencedTableName="ITEMS"
+                referencedColumnNames="ITEM_ID"/>
+    </changeSet>
+
+    <changeSet id="add-foreign-key-item_trans_dtl_trans_header_id_fk" author="Arham Shahbaz">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists schemaName="${currentSchema}"
+                                            foreignKeyName="ITEM_TRANS_DTIL_TRANS_HEDER_FK"/>
+            </not>
+        </preConditions>
+        <comment>Adding foreign key item_trans_dtl_item_id_fk</comment>
+        <addForeignKeyConstraint
+                baseTableSchemaName="${currentSchema}"
+                baseTableName="ITEM_TRANS_DETAILS"
+                baseColumnNames="HEADER_ID"
+                constraintName="ITEM_TRANS_DTIL_TRANS_HEDER_FK"
+                referencedTableSchemaName="${currentSchema}"
+                referencedTableName="ITEM_TRANS_HEADERS"
+                referencedColumnNames="HEADER_ID"/>
+    </changeSet>
+    
+    
+    
+    <changeSet id="add-foreign-key-item_trans_dtl_item_id_fk" author="Arham Shahbaz">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists schemaName="${currentSchema}"
+                                            foreignKeyName="ITEM_TRANS_DTL_ITEM_ID_FK"/>
+            </not>
+        </preConditions>
+        <comment>Adding foreign key item_trans_dtl_item_id_fk</comment>
+        <addForeignKeyConstraint
+                baseTableSchemaName="${currentSchema}"
+                baseTableName="ITEM_TRANS_DETAILS"
+                baseColumnNames="ITEM_ID"
+                constraintName="ITEM_TRANS_DTL_ITEM_ID_FK"
+                referencedTableSchemaName="${currentSchema}"
+                referencedTableName="ITEMS"
+                referencedColumnNames="ITEM_ID"/>
+    </changeSet>
+
+
+
+    <changeSet id="create_Item_view_for_quantity" author="Arham Shahbaz">
+        <createView
+                schemaName="${currentSchema}"
+                viewName="ITEM_QUANTITY_VIEW"
+                fullDefinition="true"
+        >
+            create
+            or replace view inventory.ITEM_QUANTITY_VIEW as
+            select 1                        as transq,
+                   i.item_id                as item_id,
+                   i.name                   as name,
+                   upper(adj.type::text) as trans_type,
+                   adj.quantity             as quantity
+            from inventory.item_adjustments adj
+                     join inventory.items i
+                          on adj.item_id = i.item_id
+            union all
+            select 2                        as transq,
+                   i.item_id                as item_id,
+                   i.name                   as name,
+                   upper(ith.trans_type::text) as trans_type,
+                   itd.quantity             as quantity
+            from inventory.items i
+                     join inventory.item_trans_details itd
+                          on i.item_id = itd.item_id
+                     join inventory.item_trans_headers ith
+                          on itd.header_id = ith.header_id
+            where ith.trans_type::text = any (ARRAY['PURCHASE'::character varying, 'SALE_RETURN'::character varying]::text[])
+            union all
+            select 3                        as transq,
+                   i.item_id                as item_id,
+                   i.name                   as name,
+                   upper(ith.trans_type::text) as trans_type,
+                   -itd.quantity             as quantity
+            from inventory.items i
+                     join inventory.item_trans_details itd
+                          on i.item_id = itd.item_id
+                     join inventory.item_trans_headers ith
+                          on itd.header_id = ith.header_id
+            where ith.trans_type::text = any (ARRAY['PURCHASE_RETURN'::character varying, 'SALE'::character varying]::text[])
+
+        </createView>
+    </changeSet>
+
+
+
+
+
+
+</databaseChangeLog>

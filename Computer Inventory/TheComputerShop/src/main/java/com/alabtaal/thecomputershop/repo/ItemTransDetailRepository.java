@@ -1,0 +1,15 @@
+package com.alabtaal.thecomputershop.repo;
+
+
+import com.alabtaal.thecomputershop.entity.ItemTransDetailEntity;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+import java.util.List;
+import java.util.UUID;
+
+@Repository
+public interface ItemTransDetailRepository extends JpaRepository<ItemTransDetailEntity, UUID> {
+
+
+}

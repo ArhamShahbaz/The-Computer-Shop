@@ -1,0 +1,91 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <property name="currentSchema" value="inventory"/>
+
+    <changeSet author="Arham Shahbaz" id="insert-role-super_admin">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">SELECT COUNT(*)
+                                         FROM inventory.roles
+                                         WHERE name =
+                                               'ROLE_SUPER_ADMIN';
+            </sqlCheck>
+        </preConditions>
+        <comment>insert role super admin into roles table</comment>
+        <insert schemaName="${currentSchema}" tableName="roles">
+            <column name="ROLE_ID" value="a22c466b-227f-4003-b66d-4013102e84c1"/>
+            <column name="NAME" value="ROLE_SUPER_ADMIN"/>
+        </insert>
+    </changeSet>
+
+    <changeSet author="Arham Shahbaz" id="insert-role-admin">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">SELECT COUNT(*)
+                                         FROM inventory.roles
+                                         WHERE name =
+                                               'ROLE_ADMIN';
+            </sqlCheck>
+        </preConditions>
+        <comment>insert role ADMIN into roles table</comment>
+        <insert schemaName="${currentSchema}" tableName="roles">
+            <column name="ROLE_ID" value="2224F8516BD64E2DA6C8F4DEE42AAF14"/>
+            <column name="NAME" value="ROLE_ADMIN"/>
+        </insert>
+    </changeSet>
+
+    <changeSet author="Zahid Naeem" id="insert-role-user">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">SELECT COUNT(*)
+                                         FROM inventory.roles
+                                         WHERE name =
+                                               'ROLE_USER';
+            </sqlCheck>
+        </preConditions>
+        <comment>insert role USER into roles table</comment>
+        <insert schemaName="${currentSchema}" tableName="roles">
+            <column name="ROLE_ID" value="536C1A12686E474EB919758609EDFE9A"/>
+            <column name="NAME" value="ROLE_USER"/>
+        </insert>
+    </changeSet>
+
+    <changeSet author="Zahid Naeem" id="insert-user-alabtaal">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">SELECT COUNT(*)
+                                         FROM inventory.users
+                                         WHERE lower(username) =
+                                               'alabtaal';
+            </sqlCheck>
+        </preConditions>
+        <comment>insert user alabtaal</comment>
+        <insert schemaName="${currentSchema}" tableName="users">
+            <column name="USER_ID" value="0D67157CBEDC4182824055D9AC469FE9"/>
+            <column name="NAME" value="alabtaal"/>
+            <column name="USERNAME" value="alabtaal"/>
+            <column name="EMAIL" value="alabtaal@abc.com"/>
+            <column name="PASSWORD" value="$2a$10$LfS00iCzlKe/xE1Og9jYk.vGLMuXg/Jz9Wbo7wL8TiUCrMB5/R06S"/>
+            <column name="ACTIVATION_STATUS" value="ACTIVE"/>
+        </insert>
+    </changeSet>
+
+
+
+    <changeSet author="Arham Shahbaz" id="insert-role-super_admin-for-user-alabtaal">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">SELECT COUNT(*)
+                                         FROM inventory.user_roles
+                                         WHERE user_id =
+                                               '0D67157CBEDC4182824055D9AC469FE9'
+                                           AND role_id = 'a22c466b-227f-4003-b66d-4013102e84c1';
+            </sqlCheck>
+        </preConditions>
+        <comment>insert role super admin for user alabtaal</comment>
+        <insert schemaName="${currentSchema}" tableName="user_roles">
+            <column name="USER_ID" value="0D67157CBEDC4182824055D9AC469FE9"/>
+            <column name="ROLE_ID" value="a22c466b-227f-4003-b66d-4013102e84c1"/>
+        </insert>
+    </changeSet>
+
+
+</databaseChangeLog>
